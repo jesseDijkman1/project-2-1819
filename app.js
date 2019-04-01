@@ -1,5 +1,7 @@
 const https = require("https");
-const express= require("express");
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
 
 const port = 3000;
 const app = express();
@@ -11,8 +13,25 @@ app.get("/samenwerken", (req, res) => {
     response.on("data", buffer => data += buffer)
 
     response.on("end", () => {
-      const parsed = JSON.parse(data);
-      console.log(parsed.content.rendered)
+      const html = JSON.parse(data).content.rendered;
+
+      const rx = /\[.+\]/g;
+
+      let tst = html.replace(rx, "");
+      console.log(tst)
+
+      fs.writeFile('index.html', tst, (err) => {
+        if (err) throw err;
+        console.log('The file has been saved!');
+      });
+
+      res.sendFile(path.join(`${__dirname}/index.html`))
+      // let result;
+      // while (result = rx.exec(html)) !== null) {
+      //
+      // }
+
+      // console.log(parsed.content.rendered)
       // console.log(Object.keys(parsed))
     })
   })
