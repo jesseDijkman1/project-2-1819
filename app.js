@@ -7,6 +7,7 @@ const port = 3000;
 const app = express();
 
 app.get("/samenwerken", (req, res) => {
+
   https.get("https://www.cmd-amsterdam.nl/wp-json/wp/v2/pages/758", response => {
     let data = "";
 
@@ -17,22 +18,22 @@ app.get("/samenwerken", (req, res) => {
 
       const rx = /\[.+\]/g;
 
-      let tst = html.replace(rx, "");
-      console.log(tst)
+      let normalHtml = html.replace(rx, "");
 
-      fs.writeFile('index.html', tst, (err) => {
-        if (err) throw err;
-        console.log('The file has been saved!');
-      });
+      const whiteSpaceCleaner = /(?<=\>)[\t\n\r\s]+(?=\<)/g;
 
-      res.sendFile(path.join(`${__dirname}/index.html`))
-      // let result;
-      // while (result = rx.exec(html)) !== null) {
-      //
-      // }
+      let minifiedHtml = normalHtml.replace(whiteSpaceCleaner, "")
 
-      // console.log(parsed.content.rendered)
-      // console.log(Object.keys(parsed))
+      // console.log(tst)
+      let stripRx = /\<(p|a|button|h[1-6]).+?\1\>|\<img.+?\/?\>|(?<=(div|span).+\>).[^\<\>]+(?=\<\/(div|span))/g;
+
+      let temp = [];
+      let result;
+
+      while((result = stripRx.exec(minifiedHtml)) !== null) {
+          temp.push(result[0])
+      }
+      console.log(temp)
     })
   })
 })
