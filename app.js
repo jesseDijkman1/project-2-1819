@@ -17,9 +17,13 @@ app.get("/samenwerken", (req, res) => {
     response.on("end", () => {
       const html = JSON.parse(data).content.rendered;
 
+
       // Selects all the: [full-width] bs
       const rx1 = /\[.+\]/g;
 
+      // fs.writeFile("preview.html", html, err => {
+      //   if (err) throw err
+      // })
       // Selects all white spaces
       const rx2 = /(?<=\>)[\t\n\r\s]+(?=\<)/g;
 
@@ -28,14 +32,25 @@ app.get("/samenwerken", (req, res) => {
 
       const normalHtml = html.replace(rx1, "");
 
+
+
       const minifiedHtml = normalHtml.replace(rx2, "")
 
+
+      // console.log(minifiedHtml)
+      // console.log(minifiedHtml.length)
       let smallerHtml = removeEmpty(minifiedHtml);
+      console.log(smallerHtml)
 
-      let littleBetter = makeUlLi(smallerHtml)
 
-      res.send(littleBetter)
-      console.log(littleBetter)
+      // let littleBetter = makeUlLi(smallerHtml)
+
+
+      // console.log(littleBetter)
+      // let labeled = makeLabels(littleBetter);
+      // makeLabels(littleBetter)
+      // res.send(littleBetter)
+      // console.log(littleBetter)
       // console.log(tst)
       // console.log(smallerHtml)
     })
@@ -43,15 +58,27 @@ app.get("/samenwerken", (req, res) => {
 })
 
 function removeEmpty(html) {
-  const rx = /\<(div|span|h[1-6])\s*(?:.[^\<])*\>[\s\t]*\<\/{1}\1\>/g;
+  const rx = /\<(\w+?).[^\<]*\>(?:[\s\t])*\<\/\1\>/g
 
-  if (rx.test(html) === true) {
-    let newHtml = html.replace(rx, "")
-    console.log("loop over again")
+  let tmp = 0;
+
+  const newHtml = html.replace(rx, (...arg) => {
+    const fullMatch = arg[0];
+    const group = arg[1];
+
+    if (["iframe", "textarea"].includes(group)) {
+      return fullMatch
+    } else {
+      tmp++;
+      return ""
+    }
+  })
+
+  if (tmp > 0) {
+    console.log("yes")
     return removeEmpty(newHtml)
   } else {
-    console.log("ending")
-    return html;
+    return newHtml
   }
 }
 
@@ -86,6 +113,30 @@ function makeUlLi(html) {
   })
 
   return html
+}
+
+function makeLabels(html) {
+  // console.log(html)
+  // const rx = /\<(p)\>(.*)(\<br\s*\/\>).*(input|textarea|select).*\<\/?(\1)\>/g;
+  const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g
+  // const inputTextareaRx = //g
+  let result;
+
+  while ((result = allPsRx.exec(html)) !== null) {
+      // console.log(result[0], "\n")
+  }
+
+  // html = html.replace(rx, (...args) => {
+  //   console.log("test")
+  //   let match = args[0];
+  //   const firstP = args[1];
+  //   const content = args[2];
+  //   const br = args[3];
+  //   const inputType = args[4];
+  //   const lastP = args[5];
+  //
+  //   // console.log(content, inputType)
+  // })
 }
 
 app.listen(port, () => console.log(`Listening to port: ${port}`))
