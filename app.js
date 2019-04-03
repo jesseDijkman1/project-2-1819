@@ -32,34 +32,20 @@ app.get("/samenwerken", (req, res) => {
 
       const normalHtml = html.replace(rx1, "");
 
-
-
       const minifiedHtml = normalHtml.replace(rx2, "")
+      console.log(minifiedHtml.length)
+      const smallerHtml = removeEmpty(minifiedHtml);
+      console.log(smallerHtml.length)
+      const littleBetter = makeUlLi(smallerHtml)
+      const labeled = makeLabels(littleBetter);
 
-
-      // console.log(minifiedHtml)
-      // console.log(minifiedHtml.length)
-      let smallerHtml = removeEmpty(minifiedHtml);
-      console.log(smallerHtml)
-
-
-      let littleBetter = makeUlLi(smallerHtml)
-      console.log(littleBetter)
-
-      // console.log(littleBetter)
-      let labeled = makeLabels(littleBetter);
-
-      // makeLabels(littleBetter)
       res.send(labeled)
-      // console.log(littleBetter)
-      // console.log(tst)
-      // console.log(smallerHtml)
     })
   })
 })
 
 function removeEmpty(html) {
-  const rx = /\<(\w+?).[^\<]*\>(?:[\s\t])*\<\/\1\>/g
+  const rx = /\<(\w+?)(?:.[^\<]*)?\>(?:[\s\t])*\<\/\1\>/g
 
   let tmp = 0;
 
@@ -144,7 +130,7 @@ function makeLabels(html) {
     }
     // if (hasInputRx.test)
   })
-  console.log(html)
+  // console.log(html)
   return html
 }
 
