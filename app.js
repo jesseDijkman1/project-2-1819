@@ -18,8 +18,8 @@ app.get("/samenwerken", (req, res) => {
       const html = JSON.parse(data).content.rendered;
 
 
-      // Selects all the: [full-width] bs
-      const rx1 = /\[.+\]/g;
+      // Selects all the: [full-width] and &nbsp;
+      const rx1 = /(?:\[.+\]|&nbsp;)/g;
 
       // fs.writeFile("preview.html", html, err => {
       //   if (err) throw err
