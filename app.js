@@ -15,7 +15,7 @@ app.get("/samenwerken", (req, res) => {
     response.on("data", buffer => data += buffer)
 
     response.on("end", () => {
-      const html = JSON.parse(data).content.rendered;
+      let html = JSON.parse(data).content.rendered;
 
 
       // Selects all the: [full-width] and &nbsp;
@@ -30,16 +30,22 @@ app.get("/samenwerken", (req, res) => {
       // Selects all the useful tags
       const rx3 = /\<(p|a|form|button|h[1-6]).+?\1\>|\<img.+?\/?\>|(?<=(div|span).+\>).[^\<\>]+(?=\<\/(div|span))/g;
 
-      const normalHtml = html.replace(rx1, "");
-
-      const minifiedHtml = normalHtml.replace(rx2, "")
-      console.log(minifiedHtml.length)
-      const smallerHtml = removeEmpty(minifiedHtml);
-      console.log(smallerHtml.length)
-      const littleBetter = makeUlLi(smallerHtml)
-      const labeled = makeLabels(littleBetter);
-      // console.log(labeled)
-      res.send(labeled)
+      html = html.replace(rx1, "");
+      console.log(html.length)
+      html = html.replace(rx2, "");
+      console.log(html.length)
+      html = removeEmpty(html)
+      console.log(html.length)
+      html = createHeadings(html)
+      console.log(html.length)
+      html = makeUlLi(html)
+      console.log(html.length)
+      html = makeLabels(html)
+      console.log(html.length)
+      html = removeBrs(html)
+      console.log(html)
+      
+      res.send(html)
     })
   })
 })
@@ -47,7 +53,7 @@ app.get("/samenwerken", (req, res) => {
 function removeEmpty(html) {
   const rx = /\<(\w+?)(?:.[^\<]*)?\>(?:[\s\t])*\<\/\1\>/g
   const bgImageRx = /\<(?:div|span).*?(background-image).*?\>/;
-
+//\<(div|span).[^\<\>]*?(background-image).*?\>.*?[^\<\>]*\<\/\1\>
 
   let tmp = 0;
 
@@ -136,6 +142,12 @@ function makeLabels(html) {
   })
   // console.log(html)
   return html
+}
+
+function createHeadings(html) {
+  const nectarDropcaps = /\<(?:(?:span)\s(?:class="nectar-dropcap")(?:.[^\<\>]*))\>(.[^\<\>]+)*?\<\/(?:span)\>/g;
+
+  return html.replace(nectarDropcaps, (...arg) => `<h2>${arg[1]}</h2>`)
 }
 
 app.listen(port, () => console.log(`Listening to port: ${port}`))
