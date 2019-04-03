@@ -31,20 +31,24 @@ app.get("/samenwerken", (req, res) => {
       const rx3 = /\<(p|a|form|button|h[1-6]).+?\1\>|\<img.+?\/?\>|(?<=(div|span).+\>).[^\<\>]+(?=\<\/(div|span))/g;
 
       html = html.replace(rx1, "");
-      console.log(html.length)
+      // console.log(html.length)
       html = html.replace(rx2, "");
-      console.log(html.length)
+      // console.log(html.length)
       html = removeEmpty(html)
-      console.log(html.length)
+      // html = standalones(html);
+      // res.send(html)
+      // console.log(html.length)
       html = createHeadings(html)
-      console.log(html.length)
+      // console.log(html.length)
+      html = standalones(html);
       html = makeUlLi(html)
-      console.log(html.length)
+      // console.log(html.length)
       html = makeLabels(html)
-      console.log(html.length)
-      html = removeBrs(html)
-      console.log(html)
-      
+      // console.log(html.length)
+      html = removeBr(html)
+
+      html = finalCleaner(html)
+
       res.send(html)
     })
   })
@@ -114,7 +118,7 @@ function makeUlLi(html) {
 
 function makeLabels(html) {
   // console.log(html)
-  const rx = /\<(p)\>(.*)(\<br\s*\/\>).*(input|textarea|select).*\<\/?(\1)\>/g;
+  // const rx = /\<(p)\>(.*)(\<br\s*\/\>).*(input|textarea|select).*\<\/?(\1)\>/g;
   const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g
   const hasInputRx = /\<(input|textarea|select)/;
   const getP = /(?<=\<{1}\/?)p/g;
@@ -145,9 +149,27 @@ function makeLabels(html) {
 }
 
 function createHeadings(html) {
-  const nectarDropcaps = /\<(?:(?:span)\s(?:class="nectar-dropcap")(?:.[^\<\>]*))\>(.[^\<\>]+)*?\<\/(?:span)\>/g;
+  const rx = /\<(?:(?:span)\s(?:class="nectar-dropcap")(?:.[^\<\>]*))\>(.[^\<\>]+)*?\<\/(?:span)\>/g;
 
-  return html.replace(nectarDropcaps, (...arg) => `<h2>${arg[1]}</h2>`)
+  return html.replace(rx, (...arg) => `<h2>${arg[1]}</h2>`)
+}
+
+function removeBr(html) {
+  const rx = /\<br\s*\/\>/g;
+
+  return html.replace(rx, "");
+}
+
+function standalones(html) {
+  const rx = /\<(div|span)(?:.[^\<]*)?\>(.[^\<\>]+?)\<\/\1\>/g;
+
+  return html.replace(rx, (...arg) => `${arg[2]}`)
+}
+
+function finalCleaner(html) {
+  const rx = /\<(div|span).+?\>|\<\/(div|span)\>/g;
+
+  return html.replace(rx, "");
 }
 
 app.listen(port, () => console.log(`Listening to port: ${port}`))
