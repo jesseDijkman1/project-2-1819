@@ -43,13 +43,14 @@ app.get("/samenwerken", (req, res) => {
       console.log(smallerHtml)
 
 
-      // let littleBetter = makeUlLi(smallerHtml)
-
+      let littleBetter = makeUlLi(smallerHtml)
+      console.log(littleBetter)
 
       // console.log(littleBetter)
-      // let labeled = makeLabels(littleBetter);
+      let labeled = makeLabels(littleBetter);
+
       // makeLabels(littleBetter)
-      // res.send(littleBetter)
+      res.send(labeled)
       // console.log(littleBetter)
       // console.log(tst)
       // console.log(smallerHtml)
@@ -117,26 +118,34 @@ function makeUlLi(html) {
 
 function makeLabels(html) {
   // console.log(html)
-  // const rx = /\<(p)\>(.*)(\<br\s*\/\>).*(input|textarea|select).*\<\/?(\1)\>/g;
+  const rx = /\<(p)\>(.*)(\<br\s*\/\>).*(input|textarea|select).*\<\/?(\1)\>/g;
   const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g
+  const hasInputRx = /\<(input|textarea|select)/;
+  const getP = /(?<=\<{1}\/?)p/g;
+
   // const inputTextareaRx = //g
   let result;
 
-  while ((result = allPsRx.exec(html)) !== null) {
-      // console.log(result[0], "\n")
-  }
-
-  // html = html.replace(rx, (...args) => {
-  //   console.log("test")
-  //   let match = args[0];
-  //   const firstP = args[1];
-  //   const content = args[2];
-  //   const br = args[3];
-  //   const inputType = args[4];
-  //   const lastP = args[5];
+  // const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g
+  // while ((result = allPsRx.exec(html)) !== null) {
+  //     if (hasInputRx.test(result[0])) {
   //
-  //   // console.log(content, inputType)
-  // })
+  //       let tst = result[0].replace(getP, "label")
+  //       console.log(tst, "\n")
+  //     }
+  // }
+
+  html = html.replace(allPsRx, (...args) => {
+    if (hasInputRx.test(args[0])) {
+
+      return args[0].replace(getP, "label")
+    } else {
+      return args[0]
+    }
+    // if (hasInputRx.test)
+  })
+  console.log(html)
+  return html
 }
 
 app.listen(port, () => console.log(`Listening to port: ${port}`))
