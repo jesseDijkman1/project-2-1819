@@ -38,7 +38,7 @@ app.get("/samenwerken", (req, res) => {
       console.log(smallerHtml.length)
       const littleBetter = makeUlLi(smallerHtml)
       const labeled = makeLabels(littleBetter);
-
+      // console.log(labeled)
       res.send(labeled)
     })
   })
@@ -46,14 +46,18 @@ app.get("/samenwerken", (req, res) => {
 
 function removeEmpty(html) {
   const rx = /\<(\w+?)(?:.[^\<]*)?\>(?:[\s\t])*\<\/\1\>/g
+  const bgImageRx = /\<(?:div|span).*?(background-image).*?\>/;
+
 
   let tmp = 0;
 
   const newHtml = html.replace(rx, (...arg) => {
     const fullMatch = arg[0];
     const group = arg[1];
-
+    // console.log(fullMatch)
     if (["iframe", "textarea"].includes(group)) {
+      return fullMatch
+    } else if (bgImageRx.test(fullMatch)) {
       return fullMatch
     } else {
       tmp++;
