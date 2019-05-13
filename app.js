@@ -2,9 +2,15 @@ const https = require("https");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const ejs = require("ejs");
 
 const port = 3000;
+
 const app = express();
+
+app.set("view engine", "ejs");
+app.set("views", "views");
+app.use(express.static("static"));
 
 app.get("/samenwerken", (req, res) => {
 
@@ -17,39 +23,37 @@ app.get("/samenwerken", (req, res) => {
     response.on("end", () => {
       let html = JSON.parse(data).content.rendered;
 
-
       // Selects all the: [full-width] and &nbsp;
       const rx1 = /(?:\[.+\]|&nbsp;)/g;
 
-      // fs.writeFile("preview.html", html, err => {
-      //   if (err) throw err
-      // })
       // Selects all white spaces
       const rx2 = /(?<=\>)[\t\n\r\s]+(?=\<)/g;
 
       // Selects all the useful tags
       const rx3 = /\<(p|a|form|button|h[1-6]).+?\1\>|\<img.+?\/?\>|(?<=(div|span).+\>).[^\<\>]+(?=\<\/(div|span))/g;
 
+
       html = html.replace(rx1, "");
-      // console.log(html.length)
+
       html = html.replace(rx2, "");
-      // console.log(html.length)
+
       html = removeEmpty(html)
-      // html = standalones(html);
-      // res.send(html)
-      // console.log(html.length)
+
       html = createHeadings(html)
-      // console.log(html.length)
+
       html = standalones(html);
       html = makeUlLi(html)
-      // console.log(html.length)
       html = makeLabels(html)
-      // console.log(html.length)
+
       html = removeBr(html)
 
       html = finalCleaner(html)
 
+      html = paragrapher(html)
+
+      html = docWrapper(html)
       res.send(html)
+      // res.render("main.ejs", {cleanedHTML: html})
     })
   })
 })
@@ -57,14 +61,12 @@ app.get("/samenwerken", (req, res) => {
 function removeEmpty(html) {
   const rx = /\<(\w+?)(?:.[^\<]*)?\>(?:[\s\t])*\<\/\1\>/g
   const bgImageRx = /\<(?:div|span).*?(background-image).*?\>/;
-//\<(div|span).[^\<\>]*?(background-image).*?\>.*?[^\<\>]*\<\/\1\>
 
   let tmp = 0;
 
   const newHtml = html.replace(rx, (...arg) => {
     const fullMatch = arg[0];
     const group = arg[1];
-    // console.log(fullMatch)
     if (["iframe", "textarea"].includes(group)) {
       return fullMatch
     } else if (bgImageRx.test(fullMatch)) {
@@ -117,34 +119,18 @@ function makeUlLi(html) {
 }
 
 function makeLabels(html) {
-  // console.log(html)
-  // const rx = /\<(p)\>(.*)(\<br\s*\/\>).*(input|textarea|select).*\<\/?(\1)\>/g;
   const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g
   const hasInputRx = /\<(input|textarea|select)/;
   const getP = /(?<=\<{1}\/?)p/g;
 
-  // const inputTextareaRx = //g
-  let result;
-
-  // const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g
-  // while ((result = allPsRx.exec(html)) !== null) {
-  //     if (hasInputRx.test(result[0])) {
-  //
-  //       let tst = result[0].replace(getP, "label")
-  //       console.log(tst, "\n")
-  //     }
-  // }
-
   html = html.replace(allPsRx, (...args) => {
     if (hasInputRx.test(args[0])) {
-
       return args[0].replace(getP, "label")
     } else {
       return args[0]
     }
-    // if (hasInputRx.test)
   })
-  // console.log(html)
+
   return html
 }
 
@@ -170,6 +156,53 @@ function finalCleaner(html) {
   const rx = /\<(div|span).+?\>|\<\/(div|span)\>/g;
 
   return html.replace(rx, "");
+}
+
+function paragrapher(html) {
+  const rx = /(?<=(\<\/.+?\>)).+?(\<\/?.+?\>)/g;
+  const rx2 = /^([^<].+)\<(\/?)p\>/m
+  // let res;
+
+  return html.replace(rx, (...arg) => {
+    // console.log(`\n${arg[0]}\n`)
+    if (rx2.test(arg[0])) {
+      // console.log(`${arg[0]}\n`)
+
+      return arg[0].replace(rx2, (...g) => {
+        if (!g[2]) {
+          return g[0].replace(g[1], () => `<p>${g[1]}</p>`)
+        } else {
+          return `<p>${g[1]}</p>`
+        }
+      })
+    } else {
+      return arg[0]
+    }
+  })
+
+  // while(res = rx.exec(html)) {
+  //   if (rx2.test(res[0])) {
+  //     res[0].replace(rx2, (...g) => {
+  //       return `<p>${g[1]}</p>`
+  //     })
+  //   }
+  // }
+}
+
+function docWrapper(html) {
+  return `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  	<meta charset="UTF-8">
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/cleaned.css">
+  </head>
+  <body>
+    ${html}
+  </body>
+  </html>
+`
 }
 
 app.listen(port, () => console.log(`Listening to port: ${port}`))
