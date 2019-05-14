@@ -32,7 +32,7 @@ app.get("/samenwerken", (req, res) => {
       // Selects all the useful tags
       const rx3 = /\<(p|a|form|button|h[1-6]).+?\1\>|\<img.+?\/?\>|(?<=(div|span).+\>).[^\<\>]+(?=\<\/(div|span))/g;
 
-
+      console.log(html)
       html = html.replace(rx1, "");
 
       html = html.replace(rx2, "");
@@ -50,6 +50,8 @@ app.get("/samenwerken", (req, res) => {
       html = finalCleaner(html)
 
       html = paragrapher(html)
+
+      html = iframeFixer(html)
 
       html = sectioner(html)
 
@@ -186,6 +188,7 @@ function paragrapher(html) {
 
 function sectioner(html) {
   const rx = /<h2>.+?<\/h2>/g;
+  const rxUlDiv = /<h3[\w\d\W\n\s\t]+?<\/ul>/g;
   const max = html.match(rx).length;
   let i = 0;
 
@@ -206,10 +209,21 @@ function sectioner(html) {
     }
   })
 
+  temp = temp.replace(rxUlDiv, (...g) => {
+    return `<div class="list-container">${g[0]}</div>`
+  })
+
+
 
   temp += "</footer>"
 
   return temp;
+}
+
+function iframeFixer(html) {
+  const rx = /(?:<p>)(<ifram.+?>.*?<\/iframe>)(?:<\/p>)/g;
+
+  return html.replace(rx, (...g) => `<div class="iframe-container">${g[1]}</div>`)
 }
 
 function docWrapper(html) {
@@ -222,9 +236,7 @@ function docWrapper(html) {
     <link rel="stylesheet" href="/css/cleaned.css">
   </head>
   <body>
-    <div class="page-wrapper">
     ${html}
-    </div>
   </body>
   </html>
 `
