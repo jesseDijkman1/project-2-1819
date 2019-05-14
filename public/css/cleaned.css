@@ -132,6 +132,10 @@ header h2 {
   font-size: 3rem;
 }
 
+img {
+  margin: 1rem 0;
+}
+
 header, body > section:last-of-type {
   background: var(--c-gray-light)
 }

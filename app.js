@@ -10,12 +10,10 @@ const app = express();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
-app.use(express.static("static"));
+app.use(express.static("public"));
 
-app.get("/samenwerken", (req, res) => {
-
-// https://www.cmd-amsterdam.nl/wp-json/wp/v2/pages/758
-  https.get("https://www.cmd-amsterdam.nl/wp-json/wp/v2/pages/8858", response => {
+app.get("/:pageId", (req, res) => {
+  https.get(`https://www.cmd-amsterdam.nl/wp-json/wp/v2/pages/${req.params.pageId}`, response => {
     let data = "";
 
     response.on("data", buffer => data += buffer)
@@ -200,10 +198,11 @@ function docWrapper(html) {
   	<meta charset="UTF-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
   	<meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="/css/cleaned.css">
+    <link rel="stylesheet" href="css/cleaned.css">
   </head>
   <body>
     ${html}
+    <script src="js/main.js"></script>
   </body>
   </html>
 `
