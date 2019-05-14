@@ -1,8 +1,8 @@
-const https = require("https");
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const ejs = require("ejs");
+const https = require("https"),
+      express = require("express"),
+      fs = require("fs"),
+      path = require("path"),
+      ejs = require("ejs");
 
 const port = 3000;
 
@@ -23,26 +23,18 @@ app.get("/samenwerken", (req, res) => {
     response.on("end", () => {
       let html = JSON.parse(data).content.rendered;
 
-      // Selects all the: [full-width] and &nbsp;
-      const rx1 = /(?:\[.+\]|&nbsp;)/g;
+      html = html.replace(/(?:\[.+\]|&nbsp;)/g, "");
 
-      // Selects all white spaces
-      const rx2 = /(?<=\>)[\t\n\r\s]+(?=\<)/g;
-
-      // Selects all the useful tags
-      const rx3 = /\<(p|a|form|button|h[1-6]).+?\1\>|\<img.+?\/?\>|(?<=(div|span).+\>).[^\<\>]+(?=\<\/(div|span))/g;
-
-      console.log(html)
-      html = html.replace(rx1, "");
-
-      html = html.replace(rx2, "");
+      html = html.replace(/(?<=\>)[\t\n\r\s]+(?=\<)/g, "");
 
       html = removeEmpty(html)
 
       html = createHeadings(html)
 
       html = standalones(html);
+
       html = makeUlLi(html)
+
       html = makeLabels(html)
 
       html = removeBr(html)
@@ -56,21 +48,22 @@ app.get("/samenwerken", (req, res) => {
       html = sectioner(html)
 
       html = docWrapper(html)
+
       res.send(html)
-      // res.render("main.ejs", {cleanedHTML: html})
     })
   })
 })
 
 function removeEmpty(html) {
-  const rx = /\<(\w+?)(?:.[^\<]*)?\>(?:[\s\t])*\<\/\1\>/g
-  const bgImageRx = /\<(?:div|span).*?(background-image).*?\>/;
+  const rx = /\<(\w+?)(?:.[^\<]*)?\>(?:[\s\t])*\<\/\1\>/g,
+        bgImageRx = /\<(?:div|span).*?(background-image).*?\>/;
 
   let tmp = 0;
 
   const newHtml = html.replace(rx, (...arg) => {
-    const fullMatch = arg[0];
-    const group = arg[1];
+    const fullMatch = arg[0],
+          group = arg[1];
+
     if (["iframe", "textarea"].includes(group)) {
       return fullMatch
     } else if (bgImageRx.test(fullMatch)) {
@@ -82,7 +75,6 @@ function removeEmpty(html) {
   })
 
   if (tmp > 0) {
-    console.log("yes")
     return removeEmpty(newHtml)
   } else {
     return newHtml
@@ -90,31 +82,23 @@ function removeEmpty(html) {
 }
 
 function makeUlLi(html) {
-  // Full regex
   const rx = /(?:\<(div)\s*(?:.[^\<])*\>)?[\s\t\n]*(•).+?(?:\<\/(div)|(br\s*\/{0,1}))?\>/g;
 
   html = html.replace(rx, (...args) => {
     let match = args[0];
-    const firstDiv = args[1];
-    const bullet = args[2];
-    const lastDiv = args[3];
-    const br = args[4];
 
-    if (firstDiv !== undefined) {
-      match = match.replace(firstDiv, "ul")
-    }
+    const firstDiv = args[1],
+          bullet = args[2],
+          lastDiv = args[3],
+          br = args[4];
 
-    if (bullet !== undefined) {
-      match = match.replace(bullet, "<li>")
-    }
+    if (firstDiv !== undefined) match = match.replace(firstDiv, "ul")
 
-    if (lastDiv !== undefined) {
-      match = match.replace(lastDiv, "li></ul")
-    }
+    if (bullet !== undefined) match = match.replace(bullet, "<li>")
 
-    if (br !== undefined) {
-      match = match.replace(br, "/li")
-    }
+    if (lastDiv !== undefined) match = match.replace(lastDiv, "li></ul")
+
+    if (br !== undefined) match = match.replace(br, "/li")
 
     return match
   })
@@ -123,9 +107,9 @@ function makeUlLi(html) {
 }
 
 function makeLabels(html) {
-  const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g
-  const hasInputRx = /\<(input|textarea|select)/;
-  const getP = /(?<=\<{1}\/?)p/g;
+  const allPsRx = /(\<p\s*(?:.[^\<p])*\>).+?(\<\/p\>)/g,
+        hasInputRx = /\<(input|textarea|select)/,
+        getP = /(?<=\<{1}\/?)p/g;
 
   html = html.replace(allPsRx, (...args) => {
     if (hasInputRx.test(args[0])) {
@@ -139,38 +123,27 @@ function makeLabels(html) {
 }
 
 function createHeadings(html) {
-  const rx = /\<(?:(?:span)\s(?:class="nectar-dropcap")(?:.[^\<\>]*))\>(.[^\<\>]+)*?\<\/(?:span)\>/g;
-
-  return html.replace(rx, (...arg) => `<h2>${arg[1]}</h2>`)
+  return html.replace(/\<(?:(?:span)\s(?:class="nectar-dropcap")(?:.[^\<\>]*))\>(.[^\<\>]+)*?\<\/(?:span)\>/g, (...arg) => `<h2>${arg[1]}</h2>`)
 }
 
 function removeBr(html) {
-  const rx = /\<br\s*\/\>/g;
-
-  return html.replace(rx, "");
+  return html.replace(/\<br\s*\/\>/g, "");
 }
 
 function standalones(html) {
-  const rx = /\<(div|span)(?:.[^\<]*)?\>(.[^\<\>]+?)\<\/\1\>/g;
-
-  return html.replace(rx, (...arg) => `${arg[2]}`)
+  return html.replace(/\<(div|span)(?:.[^\<]*)?\>(.[^\<\>]+?)\<\/\1\>/g, (...arg) => `${arg[2]}`)
 }
 
 function finalCleaner(html) {
-  const rx = /\<(div|span).+?\>|\<\/(div|span)\>/g;
-
-  return html.replace(rx, "");
+  return html.replace(/\<(div|span).+?\>|\<\/(div|span)\>/g, "");
 }
 
 function paragrapher(html) {
-  const rx = /(?<=(\<\/.+?\>)).+?(\<\/?.+?\>)/g;
-  const rx2 = /^([^<].+)\<(\/?)p\>/m
-  // let res;
+  const rx = /(?<=(\<\/.+?\>)).+?(\<\/?.+?\>)/g,
+        rx2 = /^([^<].+)\<(\/?)p\>/m
 
   return html.replace(rx, (...arg) => {
-    // console.log(`\n${arg[0]}\n`)
     if (rx2.test(arg[0])) {
-      // console.log(`${arg[0]}\n`)
 
       return arg[0].replace(rx2, (...g) => {
         if (!g[2]) {
@@ -183,13 +156,13 @@ function paragrapher(html) {
       return arg[0]
     }
   })
-
 }
 
 function sectioner(html) {
-  const rx = /<h2>.+?<\/h2>/g;
-  const rxUlDiv = /<h3[\w\d\W\n\s\t]+?<\/ul>/g;
-  const max = html.match(rx).length;
+  const rx = /<h2>.+?<\/h2>/g,
+        rxUlDiv = /<h3[\w\d\W\n\s\t]+?<\/ul>/g,
+        max = html.match(rx).length;
+
   let i = 0;
 
   let temp = html.replace(rx, (...g) => {
@@ -209,11 +182,7 @@ function sectioner(html) {
     }
   })
 
-  temp = temp.replace(rxUlDiv, (...g) => {
-    return `<div class="list-container">${g[0]}</div>`
-  })
-
-
+  temp = temp.replace(rxUlDiv, (...g) => `<div class="list-container">${g[0]}</div>`)
 
   temp += "</footer>"
 
@@ -221,9 +190,7 @@ function sectioner(html) {
 }
 
 function iframeFixer(html) {
-  const rx = /(?:<p>)(<ifram.+?>.*?<\/iframe>)(?:<\/p>)/g;
-
-  return html.replace(rx, (...g) => `<div class="iframe-container">${g[1]}</div>`)
+  return html.replace(/(?:<p>)(<ifram.+?>.*?<\/iframe>)(?:<\/p>)/g, (...g) => `<div class="iframe-container">${g[1]}</div>`)
 }
 
 function docWrapper(html) {

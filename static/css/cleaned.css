@@ -124,6 +124,10 @@ input, select, textarea {
   margin-top: .25rem;
 }
 
+textarea {
+  resize: none;
+}
+
 header h2 {
   font-size: 3rem;
 }
