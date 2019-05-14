@@ -202,7 +202,6 @@ function docWrapper(html) {
   </head>
   <body>
     ${html}
-    <script src="js/main.js"></script>
   </body>
   </html>
 `
