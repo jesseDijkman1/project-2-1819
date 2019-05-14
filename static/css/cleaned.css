@@ -1,5 +1,30 @@
+body {
+  /* padding: 0 10vw; */
+}
+
+body > * {
+  /* display: block; */
+  /* max-width: 72rem;
+  width: 70%;
+  min-width: 320px;
+  margin: 0 auto; */
+}
+
+.page-wrapper {
+  display: block;
+  max-width: 72rem;
+  min-width: 320px;
+  width: 70%;
+  margin: 0 auto;
+}
+
 form label {
   margin-top: 1em;
   display: flex;
   flex-direction: column;
+}
+
+iframe {
+  display: block;
+  width: 100%;
 }

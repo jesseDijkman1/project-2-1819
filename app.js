@@ -51,6 +51,8 @@ app.get("/samenwerken", (req, res) => {
 
       html = paragrapher(html)
 
+      html = sectioner(html)
+
       html = docWrapper(html)
       res.send(html)
       // res.render("main.ejs", {cleanedHTML: html})
@@ -180,13 +182,34 @@ function paragrapher(html) {
     }
   })
 
-  // while(res = rx.exec(html)) {
-  //   if (rx2.test(res[0])) {
-  //     res[0].replace(rx2, (...g) => {
-  //       return `<p>${g[1]}</p>`
-  //     })
-  //   }
-  // }
+}
+
+function sectioner(html) {
+  const rx = /<h2>.+?<\/h2>/g;
+  const max = html.match(rx).length;
+  let i = 0;
+
+  let temp = html.replace(rx, (...g) => {
+    if (i == 0) {
+      i++
+      return `<header>${g[0]}`
+    } else if (i >= max - 1) {
+
+      i++
+      return `</section><footer>${g[0]}`
+    } else if (i == 1) {
+      i++
+      return `</header><section>${g[0]}`
+    } else {
+      i++
+      return `</section><section>${g[0]}`
+    }
+  })
+
+
+  temp += "</footer>"
+
+  return temp;
 }
 
 function docWrapper(html) {
@@ -199,7 +222,9 @@ function docWrapper(html) {
     <link rel="stylesheet" href="/css/cleaned.css">
   </head>
   <body>
+    <div class="page-wrapper">
     ${html}
+    </div>
   </body>
   </html>
 `
