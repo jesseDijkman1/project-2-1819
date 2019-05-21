@@ -1,4 +1,6 @@
 # Project 2 CMDA - Jesse Dijkman
+In samenwerking met [Robin Stut](https://github.com/RobinStut)
+
 ## Assignment
 For this course we're going to improve the performance and accessiblity of a website. The website I'm going to improve is [cmd-amsterdam.nl](https://www.cmd-amsterdam.nl/).
 
@@ -8,6 +10,10 @@ For this course we're going to improve the performance and accessiblity of a web
 - [Getting started](#getting-started)
   - [Installation](#installation)
   - [Running](#running)
+- [First Audit](#first-audit)
+- [Concept](#concept)
+- [How it works](#how-it-works)
+- [License](#license)
 
 ---
 
@@ -31,6 +37,8 @@ For this course we're going to improve the performance and accessiblity of a web
 ## Concept
 My concept is a plugin that you can install on wordpress, that allows users to convert the current wordpress site to a readable one (for screenreaders).
 
+---
+
 ## How it works
 With the use of a wordpress feature that allows you to get JSON data from any wordpress website by pasting this: `/wp-json/wp/v2/pages/${page id}` after the URL. With this I can get JSON and by diving into the data I can get the static HTML. This html is converted to a single line, and then with the use of [Regular Expressions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions) I can look for patterns and convert them to more semantic html. The HTML goes through multiple steps:
 
@@ -52,4 +60,11 @@ html = docWrapper(html)
 
 And with the use of CSS selectors I can add some styling.
 
-In samenwerking met [Robin Stut](https://github.com/RobinStut)
+And then finally I ran another audit test and the results, with the results below.
+
+![Final audits results](readme-images/final-audit.png)
+
+--- 
+
+## License
+MIT © [Jesse Dijkman](https://github.com/jesseDijkman1)
