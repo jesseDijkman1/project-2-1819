@@ -16,9 +16,11 @@ app.get("/:pageId", (req, res) => {
   https.get(`https://www.cmd-amsterdam.nl/wp-json/wp/v2/pages/${req.params.pageId}`, response => {
     let data = "";
 
+
     response.on("data", buffer => data += buffer)
 
     response.on("end", () => {
+      console.log(data)
       let html = JSON.parse(data).content.rendered;
 
       html = html.replace(/(?:\[.+\]|&nbsp;)/g, "");
