@@ -20,7 +20,6 @@ app.get("/:pageId", (req, res) => {
     response.on("data", buffer => data += buffer)
 
     response.on("end", () => {
-      console.log(data)
       let html = JSON.parse(data).content.rendered;
 
       html = html.replace(/(?:\[.+\]|&nbsp;)/g, "");
